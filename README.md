@@ -5,7 +5,7 @@ Detect HCM from ECG and echocardiogram
 - Create conda environment using 'conda env create -f environment.yml'
 
 # Requirements
-1. Each client should have 'client.py', 'utils.py' and 'model.py' residing in their own respective machines. 
+1. Each client should have 'client.py', 'utils.py' and 'model.py' residing in their own respective machines.
 2. Server and Client should be able to connect to same IP and port.
 
 # Training Procedure
@@ -13,4 +13,4 @@ Detect HCM from ECG and echocardiogram
 2. Run 'client.py' for each client. After enough clients are connected to server, training will start automatically and the rest is handled by Flower framework.
 
 # Echocardiogram
-- Files for EchoCariogram resides in 'Echo' folder. The structure, requirements and training procedure are similar to ECG as described above. 
+- Files for Echocariogram resides in 'Echo' folder. The structure, requirements and training procedure are similar to ECG as described above. 
