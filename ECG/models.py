@@ -26,26 +26,28 @@ class multi_conv2d_new(nn.Module):
         self.c1 = nn.Conv2d(in_filters, num_filters, kernel_size=(1,1), padding='same')
         self.act_c1 = nn.ReLU()
         self.bn_c1 = nn.BatchNorm2d(num_filters, affine=True)
-        
+
+        self.res  = nn.Conv2d(in_filters, num_filters * 3, kernel_size=1, stride=1)
         
     def forward(self, x):
-        a = self.a1(x)
+        a = self.act_a1(self.a1(x))
         a = self.bn_a1(a)
-        a = self.a2(a)
+        a = self.act_a2(self.a2(a))
         a = self.bn_a2(a)
         
-        b = self.b1(x)
+        b = self.act_b1(self.b1(x))
         b = self.bn_b1(b)
-        b = self.b2(b)
+        b = self.act_b2(self.b2(b))
         b = self.bn_b2(b)
-        b = self.b3(b)
+        b = self.act_b3(self.b3(b))
         b = self.bn_b3(b)
         
-        c = self.c1(x)
+        c = self.act_c1(self.c1(x))
         c = self.bn_c1(c)
-
+        
         out = torch.cat((a,b,c), dim=1)
         
+        out = out + self.res(x)
         return out
     
 class Convolutional2d_new(nn.Module):
@@ -87,11 +89,14 @@ class Convolutional2d_new(nn.Module):
         self.multi_conv2d_16 = multi_conv2d_new(int(initial_filters*8*3), int(initial_filters*12))
         self.multi_conv2d_17 = multi_conv2d_new(int(initial_filters*12*3), int(initial_filters*14))
         self.multi_conv2d_18 = multi_conv2d_new(int(initial_filters*14*3), int(initial_filters*16))
+        
+        self.multi_conv2d_19 = multi_conv2d_new(int(initial_filters*16*3), int(initial_filters*16))
+        self.multi_conv2d_20 = multi_conv2d_new(int(initial_filters*16*3), int(initial_filters*16))
 
-        self.dp = nn.Dropout(0.5)
+        self.dp = nn.Dropout(0.0)
         self.linear = nn.Linear(int(initial_filters*16*3), 1)
         self.act = nn.Sigmoid()
-        
+
     def forward(self, x):
         x = self.conv1(x)
         x = self.act1(x)
@@ -127,13 +132,16 @@ class Convolutional2d_new(nn.Module):
         x = self.multi_conv2d_16(x)
         x = self.multi_conv2d_17(x)
         x = self.multi_conv2d_18(x)
+        
+        x = self.multi_conv2d_19(x)
+        x = self.multi_conv2d_20(x)
 
         x = torch.mean(x, [2, 3])
         
         x = self.dp(x)
         x = self.linear(x)
-        out = self.act(x)
         
+        out = self.act(x)
         return out
     
     
