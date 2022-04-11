@@ -34,7 +34,10 @@ class InceptionModule(nn.Module):
         self.act_pool = nn.ReLU()
 
         self.bn = nn.BatchNorm3d(filters_1x1 + filters_3x3 + filters_5x5 + filters_pool_proj)
-
+        
+        self.res = nn.Conv3d(in_filters, filters_1x1 + filters_3x3 + filters_5x5 + filters_pool_proj, (1, 1, 1))
+        self.res_bn = nn.BatchNorm3d(filters_1x1 + filters_3x3 + filters_5x5 + filters_pool_proj)
+        
     def forward(self, x):
         conv_1x1 = self.bn1(self.act1(self.conv_1x1(x)))
 
@@ -49,8 +52,9 @@ class InceptionModule(nn.Module):
 
         out = torch.cat((conv_1x1, conv_3x3, conv_5x5, pool_project), dim=1)
         out = self.bn(out)
+        
+        out = out + self.res_bn(self.res(x))
         return out
-    
     
 class Model(nn.Module):
 
@@ -182,7 +186,6 @@ class Model(nn.Module):
 
         x = self.inception_0(x)
         x = self.inception_1(x)
-
         x = self.mp_1(x)
 
         x = self.inception_2(x)
